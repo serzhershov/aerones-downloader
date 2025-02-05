@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Download Queue{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1>Download Queue</h1>
+        <form id="download_main" action="{{ path('admin_force_download_selected') }}" method="POST">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Filename</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for download in downloads %}
+                    <tr data-download-id="{{ download.id }}">
+                        <td>
+                            <input type="checkbox" name="selectedDownloads[]" value="{{ download.id }}">
+                        </td>
+                        <td>{{ download.filename }}</td>
+                        <td class="status">{{ download.status }}</td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: {{ download.progress }}%;" aria-valuenow="{{ download.progress }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ download.progress }}%
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ path('admin_show', {'id': download.id}) }}" class="btn btn-info btn-sm">View</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary">Download Selected</button>
+        </form>
+        <a href="{{ path('admin_new') }}" class="btn btn-secondary mt-3">Add New Download</a>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        let pollingInterval;
+
+        function updateProgress() {
+            fetch('/api/downloads/progress')
+                .then(response => response.json())
+                .then(data => {
+                    data.downloads.forEach(download => {
+                        const row = document.querySelector(`tr[data-download-id="${download.id}"]`);
+                        if (row) {
+                            row.querySelector('.status').textContent = download.status;
+                            const progressBar = row.querySelector('.progress-bar');
+                            progressBar.style.width = `${download.progress}%`;
+                            progressBar.textContent = `${download.progress}%`;
+                        }
+                    });
+
+                    // Stop polling if no downloads are processing
+                    if (!data.shouldPoll) {
+                        clearInterval(pollingInterval);
+                        console.log('Polling stopped: No downloads are processing.');
+                    }
+                });
+        }
+
+        // Start polling
+        pollingInterval = setInterval(updateProgress, 3000);
+
+        window.addEventListener('load', function() {
+            document.querySelector('form#download_main').addEventListener('submit', function() {
+                pollingInterval = setInterval(updateProgress, 3000);
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,51 @@
+name: aerones-downloader
+recipe: symfony
+config:
+  type: php:8.2
+  via: nginx
+  database: postgres:15
+  webroot: public
+
+services:
+  database:
+    portforward: true
+    creds:
+      user: root
+      password: root
+      database: aerones
+    healthcheck:
+      cmd: pg_isready -U root -d aerones
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+  appserver:
+    depends_on:
+      database:
+        condition: service_healthy
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    build:
+      - composer install
+    run:
+      - php bin/console doctrine:database:create --if-not-exists
+      - php bin/console doctrine:migrations:migrate -n
+      - php bin/console doctrine:fixtures:load -n
+      - php bin/console messenger:consume async -vv
+
+tooling:
+  setup-db:
+    service: appserver
+    cmd:
+      - php bin/console doctrine:database:create --if-not-exists
+      - php bin/console doctrine:migrations:migrate -n
+  messenger:
+    service: appserver
+    cmd: php bin/console messenger:consume async -vv
+  setup:
+    service: appserver
+    description: Setup the application after start
+    cmd:
+      - php bin/console doctrine:fixtures:load -n
+      - php bin/console messenger:consume async -vv

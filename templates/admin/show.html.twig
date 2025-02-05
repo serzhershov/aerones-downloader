@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Download Details - {{ download.filename }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1>Download Details: {{ download.filename }}</h1>
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Status: {{ download.status }}</h5>
+                <p class="card-text">URL: <a href="{{ download.url }}" target="_blank">{{ download.url }}</a></p>
+                <div class="progress mt-3">
+                    <div class="progress-bar" role="progressbar" style="width: {{ download.progress }}%;" aria-valuenow="{{ download.progress }}" aria-valuemin="0" aria-valuemax="100">
+                        {{ download.progress }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="{{ path('admin_index') }}" class="btn btn-secondary mt-3">Back to Queue</a>
+    </div>
+{% endblock %}

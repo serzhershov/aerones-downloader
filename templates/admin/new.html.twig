@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add New Download{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1>Add New Download</h1>
+        {{ form_start(form, {'attr': {'class': 'mt-4'}}) }}
+        <div class="mb-3">
+            {{ form_label(form.filename, 'Filename', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.filename, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="mb-3">
+            {{ form_label(form.url, 'URL', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.url, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <button type="submit" class="btn btn-primary">Add Download</button>
+        {{ form_end(form) }}
+        <a href="{{ path('admin_index') }}" class="btn btn-secondary mt-3">Back to Queue</a>
+    </div>
+{% endblock %}
