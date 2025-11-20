@@ -46,7 +46,7 @@ Download and install **Lando** from [Lando's official site](https://docs.lando.d
 ### 2. Clone the Repository
 
 ```sh
-git clone https://github.com/YOUR_USERNAME/aerones-downloader.git
+git clone https://github.com/serzhershov/aerones-downloader.git
 cd aerones-downloader
 ```
 
